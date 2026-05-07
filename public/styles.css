@@ -1114,24 +1114,6 @@ svg {
   box-shadow: 0 0 0 2px rgba(176, 80, 30, 0.1);
 }
 
-.exchange-cell.w-player,
-.exchange-cell.w-spirit {
-  min-width: 120px;
-}
-
-.exchange-cell.w-groups,
-.exchange-cell.w-note {
-  min-width: 180px;
-}
-
-.exchange-cell.w-short {
-  min-width: 90px;
-}
-
-.exchange-cell.w-mini {
-  min-width: 62px;
-}
-
 .exchange-table tr.dirty td {
   background: rgba(176, 80, 30, 0.045);
 }
@@ -1228,8 +1210,45 @@ svg {
 .exchange-table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
   font-size: 12px;
-  min-width: 1320px;
+  min-width: 1180px;
+}
+
+.exchange-table .col-player {
+  width: 72px;
+}
+
+.exchange-table .col-spirit {
+  width: 150px;
+}
+
+.exchange-table .col-gender {
+  width: 78px;
+}
+
+.exchange-table .col-nature {
+  width: 165px;
+}
+
+.exchange-table .col-level {
+  width: 58px;
+}
+
+.exchange-table .col-groups {
+  width: 150px;
+}
+
+.exchange-table .col-stat {
+  width: 56px;
+}
+
+.exchange-table .col-note {
+  width: 155px;
+}
+
+.exchange-table .col-actions {
+  width: 108px;
 }
 
 .exchange-table th,
@@ -1247,6 +1266,67 @@ svg {
   background: var(--card);
   color: var(--muted-foreground);
   font-size: 11px;
+  height: 34px;
+}
+
+.exchange-filter-row th {
+  top: 34px;
+  background: rgba(248, 250, 252, 0.96);
+  padding-top: 5px;
+}
+
+.sort-head {
+  display: flex;
+  width: 100%;
+  cursor: pointer;
+  align-items: center;
+  justify-content: space-between;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 800;
+  padding: 0;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.sort-head::after {
+  color: var(--muted-foreground);
+  content: "↕";
+  font-size: 10px;
+}
+
+.sort-head.active[data-direction="asc"]::after {
+  content: "↑";
+}
+
+.sort-head.active[data-direction="desc"]::after {
+  content: "↓";
+}
+
+.exchange-filter-row input,
+.exchange-filter-row select {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card);
+  color: var(--foreground);
+  font-size: 11px;
+  outline: none;
+  padding: 5px 6px;
+}
+
+.clear-filters {
+  width: 100%;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--accent);
+  color: var(--foreground);
+  font-size: 11px;
+  padding: 5px 6px;
 }
 
 .row-actions {
@@ -1258,6 +1338,21 @@ svg {
 .muted-action {
   color: var(--muted-foreground);
   font-size: 12px;
+}
+
+.dex-exchange-list {
+  display: grid;
+  gap: 3px;
+  margin: 7px 0 0;
+  padding: 0;
+  color: var(--muted-foreground);
+  font-size: 12px;
+  line-height: 1.45;
+  list-style: none;
+}
+
+.dex-exchange-list li {
+  overflow-wrap: anywhere;
 }
 
 .hidden {

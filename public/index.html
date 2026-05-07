@@ -176,23 +176,62 @@
                   <button id="exchangeRefresh" type="button">刷新</button>
                 </div>
                 <div class="exchange-table-wrap">
-                  <table class="exchange-table">
+                  <table class="exchange-table" id="exchangeTable">
+                    <colgroup>
+                      <col class="col-player" />
+                      <col class="col-spirit" />
+                      <col class="col-gender" />
+                      <col class="col-nature" />
+                      <col class="col-level" />
+                      <col class="col-groups" />
+                      <col class="col-stat" />
+                      <col class="col-stat" />
+                      <col class="col-stat" />
+                      <col class="col-stat" />
+                      <col class="col-stat" />
+                      <col class="col-stat" />
+                      <col class="col-note" />
+                      <col class="col-actions" />
+                    </colgroup>
                     <thead>
                       <tr>
-                        <th>玩家</th>
-                        <th>精灵</th>
-                        <th>性别</th>
-                        <th>性格</th>
-                        <th>等级</th>
-                        <th>蛋组</th>
-                        <th>生命</th>
-                        <th>物攻</th>
-                        <th>魔攻</th>
-                        <th>物防</th>
-                        <th>魔防</th>
-                        <th>速度</th>
-                        <th>备注</th>
+                        <th><button class="sort-head" type="button" data-exchange-sort="player">玩家</button></th>
+                        <th><button class="sort-head" type="button" data-exchange-sort="spirit">精灵</button></th>
+                        <th><button class="sort-head" type="button" data-exchange-sort="gender">性别</button></th>
+                        <th><button class="sort-head" type="button" data-exchange-sort="nature">性格</button></th>
+                        <th><button class="sort-head" type="button" data-exchange-sort="level">等级</button></th>
+                        <th><button class="sort-head" type="button" data-exchange-sort="eggGroups">蛋组</button></th>
+                        <th><button class="sort-head" type="button" data-exchange-sort="stats.hp">生命</button></th>
+                        <th><button class="sort-head" type="button" data-exchange-sort="stats.attack">物攻</button></th>
+                        <th><button class="sort-head" type="button" data-exchange-sort="stats.magicAttack">魔攻</button></th>
+                        <th><button class="sort-head" type="button" data-exchange-sort="stats.defense">物防</button></th>
+                        <th><button class="sort-head" type="button" data-exchange-sort="stats.magicDefense">魔防</button></th>
+                        <th><button class="sort-head" type="button" data-exchange-sort="stats.speed">速度</button></th>
+                        <th><button class="sort-head" type="button" data-exchange-sort="note">备注</button></th>
                         <th>操作</th>
+                      </tr>
+                      <tr class="exchange-filter-row">
+                        <th><input data-exchange-filter="player" aria-label="筛选玩家" /></th>
+                        <th><input data-exchange-filter="spirit" aria-label="筛选精灵" /></th>
+                        <th>
+                          <select data-exchange-filter="gender" aria-label="筛选性别">
+                            <option value="">全部</option>
+                            <option value="公">公</option>
+                            <option value="母">母</option>
+                            <option value="无性别">无性别</option>
+                          </select>
+                        </th>
+                        <th><input data-exchange-filter="nature" aria-label="筛选性格" /></th>
+                        <th><input data-exchange-filter="level" aria-label="筛选等级" /></th>
+                        <th><input data-exchange-filter="eggGroups" aria-label="筛选蛋组" /></th>
+                        <th><input data-exchange-filter="stats.hp" aria-label="筛选生命" /></th>
+                        <th><input data-exchange-filter="stats.attack" aria-label="筛选物攻" /></th>
+                        <th><input data-exchange-filter="stats.magicAttack" aria-label="筛选魔攻" /></th>
+                        <th><input data-exchange-filter="stats.defense" aria-label="筛选物防" /></th>
+                        <th><input data-exchange-filter="stats.magicDefense" aria-label="筛选魔防" /></th>
+                        <th><input data-exchange-filter="stats.speed" aria-label="筛选速度" /></th>
+                        <th><input data-exchange-filter="note" aria-label="筛选备注" /></th>
+                        <th><button class="clear-filters" id="exchangeClearFilters" type="button">清筛选</button></th>
                       </tr>
                     </thead>
                     <tbody id="exchangeTableBody"></tbody>

@@ -40,7 +40,9 @@ const state = {
   selectedSpiritUrl: ""
   ,
   community: { users: [], entries: [], updatedAt: "" },
-  communityFilter: ""
+  communityFilter: "",
+  exchangeFilters: {},
+  exchangeSort: { field: "player", direction: "asc" }
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -78,6 +80,7 @@ const elements = {
   exchangeAddRow: $("#exchangeAddRow"),
   exchangeSaveAll: $("#exchangeSaveAll"),
   exchangeRefresh: $("#exchangeRefresh"),
+  exchangeClearFilters: $("#exchangeClearFilters"),
   exchangeTableBody: $("#exchangeTableBody"),
   spiritNameList: $("#spiritNameList"),
   natureList: $("#natureList"),
@@ -125,6 +128,11 @@ function statText(stats = {}) {
 
 function normalize(value) {
   return String(value || "").trim().toLowerCase();
+}
+
+function numericValue(value) {
+  const number = Number(String(value || "").trim());
+  return Number.isFinite(number) ? number : null;
 }
 
 function compareByDefinedOrder(a, b, order) {
@@ -297,6 +305,61 @@ function exchangePlayer(entry) {
   return entry.player || entry.ownerName || entry.owner || (isInternalId ? "" : fallbackId);
 }
 
+function exchangeFieldValue(entry, field) {
+  if (field === "player") return exchangePlayer(entry);
+  if (field === "eggGroups") return (entry.eggGroups || []).join("、");
+  if (field.startsWith("stats.")) return entry.stats?.[field.slice(6)] || "";
+  return entry[field] || "";
+}
+
+function sortExchangeEntries(entries) {
+  const { field, direction } = state.exchangeSort;
+  const factor = direction === "desc" ? -1 : 1;
+  return [...entries].sort((a, b) => {
+    const aValue = exchangeFieldValue(a, field);
+    const bValue = exchangeFieldValue(b, field);
+    const aNumber = numericValue(aValue);
+    const bNumber = numericValue(bValue);
+    if (aNumber !== null || bNumber !== null) {
+      if (aNumber === null) return 1;
+      if (bNumber === null) return -1;
+      return (aNumber - bNumber) * factor;
+    }
+    return String(aValue).localeCompare(String(bValue), "zh-Hans-CN") * factor
+      || String(exchangeFieldValue(a, "spirit")).localeCompare(String(exchangeFieldValue(b, "spirit")), "zh-Hans-CN");
+  });
+}
+
+function applyExchangeFilters(entries) {
+  const globalQuery = normalize(state.communityFilter);
+  const columnFilters = Object.entries(state.exchangeFilters).filter(([, value]) => normalize(value));
+  return entries.filter((entry) => {
+    if (globalQuery) {
+      const searchable = [
+        exchangePlayer(entry),
+        entry.spirit,
+        entry.gender,
+        entry.nature,
+        entry.level,
+        entry.note,
+        ...(entry.eggGroups || []),
+        ...Object.values(entry.stats || {})
+      ];
+      if (!searchable.some((field) => normalize(field).includes(globalQuery))) return false;
+    }
+
+    return columnFilters.every(([field, value]) => normalize(exchangeFieldValue(entry, field)).includes(normalize(value)));
+  });
+}
+
+function updateExchangeSortIndicators() {
+  document.querySelectorAll("[data-exchange-sort]").forEach((button) => {
+    const active = button.dataset.exchangeSort === state.exchangeSort.field;
+    button.classList.toggle("active", active);
+    button.dataset.direction = active ? state.exchangeSort.direction : "";
+  });
+}
+
 function setExchangeStatus(message) {
   elements.exchangeMeta.textContent = message;
 }
@@ -456,23 +519,11 @@ function populateNatureList() {
 function renderCommunityExchange() {
   if (!elements.exchangeTableBody) return;
   const entries = getAllExchangeEntries();
-  const query = normalize(state.communityFilter);
-  const filtered = entries.filter((entry) => {
-    if (!query) return true;
-    return [
-      exchangePlayer(entry),
-      entry.spirit,
-      entry.gender,
-      entry.nature,
-      entry.level,
-      entry.note,
-      ...(entry.eggGroups || []),
-      ...Object.values(entry.stats || {})
-    ].some((field) => normalize(field).includes(query));
-  });
+  const filtered = sortExchangeEntries(applyExchangeFilters(entries));
 
   elements.exchangeCount.textContent = `${entries.length} 记录`;
-  elements.exchangeMeta.textContent = `${entries.length} 条共享记录 · 所有人都可以直接编辑`;
+  elements.exchangeMeta.textContent = `${filtered.length} / ${entries.length} 条共享记录 · 所有人都可以直接编辑`;
+  updateExchangeSortIndicators();
 
   elements.exchangeTableBody.innerHTML = filtered.length
     ? filtered.map((entry) => `
@@ -613,9 +664,7 @@ function renderDexGrid() {
       const eggGroups = eggGroupsBySpirit.get(item.name) || [];
       const exchangeRows = exchangeBySpirit.get(item.name) || [];
       const detail = detailsByUrl.get(item.wikiUrl);
-      const exchangeText = exchangeRows.length
-        ? exchangeRows.map((row) => `${exchangePlayer(row) || "未填玩家"}${row.gender ? ` ${row.gender}` : ""}${row.nature ? ` ${row.nature}` : ""}`).join("；")
-        : "";
+      const exchangeList = exchangeRows.map((row) => `${exchangePlayer(row) || "未填玩家"}${row.gender ? ` ${row.gender}` : ""}${row.nature ? ` ${row.nature}` : ""}`);
       const detailText = detail?.stats?.total
         ? `种族值 ${detail.stats.total}${detail.characteristics?.[0]?.name ? ` · ${detail.characteristics[0].name}` : ""}`
         : "详情待导入";
@@ -637,7 +686,7 @@ function renderDexGrid() {
               <div><dt>蛋组</dt><dd>${eggGroups.length ? escapeHtml(eggGroups.join(" / ")) : "暂无"}</dd></div>
             </dl>
             <p class="dex-detail-line">${escapeHtml(detailText)}</p>
-            ${exchangeText ? `<p class="dex-note">${escapeHtml(exchangeText)}</p>` : ""}
+            ${exchangeList.length ? `<ul class="dex-exchange-list">${exchangeList.map((text) => `<li>${escapeHtml(text)}</li>`).join("")}</ul>` : ""}
             <button class="dex-open-detail" type="button" data-wiki-url="${escapeHtml(item.wikiUrl)}">查看详情</button>
           </div>
         </article>
@@ -916,6 +965,36 @@ function wireEvents() {
 
   elements.exchangeFilter.addEventListener("input", () => {
     state.communityFilter = elements.exchangeFilter.value;
+    renderCommunityExchange();
+  });
+  document.querySelectorAll("[data-exchange-sort]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const field = button.dataset.exchangeSort;
+      if (state.exchangeSort.field === field) {
+        state.exchangeSort.direction = state.exchangeSort.direction === "asc" ? "desc" : "asc";
+      } else {
+        state.exchangeSort = { field, direction: "asc" };
+      }
+      renderCommunityExchange();
+    });
+  });
+  document.querySelectorAll("[data-exchange-filter]").forEach((input) => {
+    input.addEventListener("input", () => {
+      state.exchangeFilters[input.dataset.exchangeFilter] = input.value;
+      renderCommunityExchange();
+    });
+    input.addEventListener("change", () => {
+      state.exchangeFilters[input.dataset.exchangeFilter] = input.value;
+      renderCommunityExchange();
+    });
+  });
+  elements.exchangeClearFilters.addEventListener("click", () => {
+    state.communityFilter = "";
+    state.exchangeFilters = {};
+    elements.exchangeFilter.value = "";
+    document.querySelectorAll("[data-exchange-filter]").forEach((input) => {
+      input.value = "";
+    });
     renderCommunityExchange();
   });
   elements.exchangeAddRow.addEventListener("click", addExchangeRow);
