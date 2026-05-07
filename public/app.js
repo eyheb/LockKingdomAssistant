@@ -130,7 +130,10 @@ function statText(stats = {}) {
 }
 
 function countSkillEntries(details = []) {
-  return details.reduce((sum, detail) => sum + (detail.skills?.length || 0), 0);
+  return details.reduce(
+    (sum, detail) => sum + (detail.skills?.length || 0) + (detail.bloodlineSkills?.length || 0) + (detail.skillStones?.length || 0),
+    0
+  );
 }
 
 function normalize(value) {
@@ -355,7 +358,7 @@ function renderInspector(data) {
         .map((item) =>
           resultCard(
             item.name,
-            [item.attribute, item.category, item.power ? `威力 ${item.power}` : "", item.ownerName ? `来源 ${item.ownerName}` : ""].filter(Boolean).join(" · "),
+            [item.source, item.attribute, item.category, item.power ? `威力 ${item.power}` : "", item.ownerName ? `来源 ${item.ownerName}` : ""].filter(Boolean).join(" · "),
             [item.attribute, item.category].filter(Boolean)
           )
         )
@@ -880,6 +883,18 @@ function statRowsHtml(stats = {}) {
     .join("");
 }
 
+function renderSkillCards(skills = []) {
+  return skills?.length
+    ? skills.map((skill) => `
+        <article>
+          <strong>${escapeHtml(skill.name)}</strong>
+          <span>${escapeHtml([skill.level, skill.attribute, skill.category, skill.power ? `威力 ${skill.power}` : ""].filter(Boolean).join(" · "))}</span>
+          <p>${escapeHtml(skill.description)}</p>
+        </article>
+      `).join("")
+    : `<p class="empty">暂无资料。</p>`;
+}
+
 function renderDetailView(wikiUrl) {
   const dex = (state.data.biligameDex || []).find((item) => item.wikiUrl === wikiUrl);
   const detail = getDetailsByUrl().get(wikiUrl);
@@ -975,17 +990,20 @@ function renderDetailView(wikiUrl) {
       </section>
 
       <section class="detail-panel wide">
-        <h3>技能列表 <span>${detail.skills?.length || 0}</span></h3>
-        <div class="skill-table">
-          ${detail.skills?.length
-            ? detail.skills.map((skill) => `
-                <article>
-                  <strong>${escapeHtml(skill.name)}</strong>
-                  <span>${escapeHtml([skill.level, skill.attribute, skill.category, skill.power ? `威力 ${skill.power}` : ""].filter(Boolean).join(" · "))}</span>
-                  <p>${escapeHtml(skill.description)}</p>
-                </article>
-              `).join("")
-            : `<p class="empty">暂无技能资料。</p>`}
+        <h3>技能列表 <span>${(detail.skills?.length || 0) + (detail.bloodlineSkills?.length || 0) + (detail.skillStones?.length || 0)}</span></h3>
+        <div class="skill-sections">
+          <div class="skill-section">
+            <h4>精灵技能 <span>${detail.skills?.length || 0}</span></h4>
+            <div class="skill-table">${renderSkillCards(detail.skills)}</div>
+          </div>
+          <div class="skill-section">
+            <h4>血脉技能 <span>${detail.bloodlineSkills?.length || 0}</span></h4>
+            <div class="skill-table">${renderSkillCards(detail.bloodlineSkills)}</div>
+          </div>
+          <div class="skill-section">
+            <h4>可学技能石 <span>${detail.skillStones?.length || 0}</span></h4>
+            <div class="skill-table">${renderSkillCards(detail.skillStones)}</div>
+          </div>
         </div>
       </section>
     </div>

@@ -6,11 +6,20 @@ import { readCommunityStore } from "./community-store.mjs";
 const __filename = fileURLToPath(import.meta.url);
 const projectRoot = path.resolve(path.dirname(__filename), "..");
 const dataRoot = path.join(projectRoot, "data");
+const generatedDataRoot = path.join(projectRoot, "generated-data");
 
 function readJson(filename, fallback) {
   const filePath = path.join(dataRoot, filename);
   if (!fs.existsSync(filePath)) return fallback;
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
+}
+
+function readJsonPreferGenerated(filename, fallback) {
+  const generatedPath = path.join(generatedDataRoot, filename);
+  if (fs.existsSync(generatedPath)) {
+    return JSON.parse(fs.readFileSync(generatedPath, "utf8"));
+  }
+  return readJson(filename, fallback);
 }
 
 function normalizeCommunityEntries(file) {
@@ -32,7 +41,7 @@ export function loadData() {
   const eggGroupFile = readJson("egg-groups.json", { groups: [] });
   const exchangeFile = readJson("exchange.json", { entries: [] });
   const biligameDexFile = readJson("biligame-spirit-dex.json", { spirits: [], source: null });
-  const biligameDetailsFile = readJson("biligame-spirit-details.json", { details: [], source: null });
+  const biligameDetailsFile = readJsonPreferGenerated("biligame-spirit-details.json", { details: [], source: null });
   const communityExchangeFile = readJson("community-exchange.json", null);
   const communityExchange = normalizeCommunityEntries(communityExchangeFile || { entries: [] });
 
@@ -148,7 +157,7 @@ function detailSearchScore(detail, query) {
     ...(detail.characteristics || []).flatMap((item) => [item.name, item.description]),
     ...(detail.evolution?.chain || []).map((item) => item.name),
     ...(detail.evolution?.levels || []),
-    ...(detail.skills || []).flatMap((skill) => [
+    ...allDetailSkills(detail).flatMap((skill) => [
       skill.name,
       skill.category,
       skill.damage,
@@ -171,10 +180,23 @@ function dexSearchScore(spirit, detail, query) {
   return score;
 }
 
+function skillGroupsForDetail(detail) {
+  return [
+    { source: "精灵技能", items: detail.skills || [] },
+    { source: "血脉技能", items: detail.bloodlineSkills || [] },
+    { source: "可学技能石", items: detail.skillStones || [] }
+  ];
+}
+
+function allDetailSkills(detail) {
+  return skillGroupsForDetail(detail).flatMap(({ source, items }) => items.map((skill) => ({ ...skill, source: skill.source || source })));
+}
+
 function buildSkillIndex(biligameDetails = []) {
   return biligameDetails.flatMap((detail) =>
-    (detail.skills || []).map((skill, index) => ({
-      id: `${detail.wikiUrl || detail.name || "unknown"}#skill-${index}`,
+    allDetailSkills(detail).map((skill, index) => ({
+      id: `${detail.wikiUrl || detail.name || "unknown"}#${skill.source || "skill"}-${index}`,
+      source: skill.source || "精灵技能",
       name: skill.name || "",
       attribute: skill.attribute || "",
       category: skill.category || "",
@@ -241,6 +263,14 @@ function isSkillFocusedQuery(skillIndex, query) {
   return skillIndex.some((skill) => skill.name.length >= 2 && compact.includes(skill.name));
 }
 
+function requestedSkillSource(query) {
+  const compact = String(query || "").replace(/\s+/g, "");
+  if (/血脉技能|血脉/.test(compact)) return "血脉技能";
+  if (/技能石|可学技能石/.test(compact)) return "可学技能石";
+  if (/精灵技能|升级技能|普通技能/.test(compact)) return "精灵技能";
+  return "";
+}
+
 function isHighestPowerQuestion(query) {
   const compact = String(query || "").replace(/\s+/g, "");
   return /技能/.test(compact) && /(威力最高|最高威力|威力最大|最大威力|最强|哪个.*威力|什么.*威力)/.test(compact);
@@ -249,7 +279,7 @@ function isHighestPowerQuestion(query) {
 function groupSkillRows(skillRows) {
   const grouped = new Map();
   for (const skill of skillRows) {
-    const key = [skill.name, skill.attribute, skill.category, skill.powerValue ?? "", skill.description].join("\u0001");
+    const key = [skill.source, skill.name, skill.attribute, skill.category, skill.powerValue ?? "", skill.description].join("\u0001");
     const current = grouped.get(key);
     if (current) {
       if (skill.ownerName && !current.owners.includes(skill.ownerName)) {
@@ -315,7 +345,7 @@ function skillSearchScore(skill, query) {
   if (category && normalizedQuery.includes(category)) score += 18;
   if (description && description.includes(normalizedQuery)) score += 12;
   if (String(skill.power || "") && normalizedQuery.includes(String(skill.power))) score += 8;
-  return score + (skill.powerValue || 0) / 1000;
+  return score ? score + (skill.powerValue || 0) / 1000 : 0;
 }
 
 function exchangeSearchScore(entry, query) {
@@ -330,8 +360,9 @@ function exchangeSearchScore(entry, query) {
 }
 
 function searchSkills(skillIndex, query, limit, skillPowerInsight) {
+  const source = requestedSkillSource(query);
   if (skillPowerInsight?.candidates?.length) {
-    return skillPowerInsight.candidates.slice(0, limit);
+    return skillPowerInsight.candidates.filter((skill) => !source || skill.source === source).slice(0, limit);
   }
 
   if (!isSkillFocusedQuery(skillIndex, query)) {
@@ -339,6 +370,7 @@ function searchSkills(skillIndex, query, limit, skillPowerInsight) {
   }
 
   return skillIndex
+    .filter((skill) => !source || skill.source === source)
     .map((skill) => ({ skill, score: skillSearchScore(skill, query) }))
     .filter(({ score }) => score > 0)
     .sort(
@@ -401,7 +433,7 @@ function formatSkillOwnerText(skill, ownerLimit = 8) {
 }
 
 function formatSkillLine(skill) {
-  return `${skill.name}（${[skill.attribute, skill.category, skill.powerValue ? `威力${skill.powerValue}` : "", skill.level].filter(Boolean).join("，")}）${formatSkillOwnerText(skill) ? `，${formatSkillOwnerText(skill)}` : ""}${skill.description ? `，效果：${skill.description}` : ""}`;
+  return `${skill.name}（${[skill.source, skill.attribute, skill.category, skill.powerValue ? `威力${skill.powerValue}` : "", skill.level].filter(Boolean).join("，")}）${formatSkillOwnerText(skill) ? `，${formatSkillOwnerText(skill)}` : ""}${skill.description ? `，效果：${skill.description}` : ""}`;
 }
 
 function formatSkillPowerAnswer(insight) {
@@ -518,8 +550,9 @@ export function formatResultsForPrompt(results) {
         ? `，特性 ${detail.characteristics.slice(0, 3).map((characteristicItem) => `${characteristicItem.name}：${characteristicItem.description}`).join("；")}`
         : "";
       const restraints = detail?.restraints ? `，克制 ${detail.restraints.strongAgainst?.join("、") || "未知"}，被克制 ${detail.restraints.weakAgainst?.join("、") || "未知"}` : "";
-      const skills = detail?.skills?.length
-        ? `，技能 ${detail.skills.slice(0, 14).map((skill) => `${skill.name}(${skill.attribute}/${skill.category}/威力${skill.power})`).join("、")}`
+      const detailSkills = detail ? allDetailSkills(detail) : [];
+      const skills = detailSkills.length
+        ? `，技能 ${detailSkills.slice(0, 18).map((skill) => `${skill.name}(${skill.source}/${skill.attribute}/${skill.category}/威力${skill.power})`).join("、")}`
         : "";
       return `- NO.${item.number} ${item.name}：${item.types.join("、") || "未知属性"}，${item.stage || "未知阶段"}，${item.form || "未知形态"}${stats}${physique}${distribution}${characteristic}${restraints}${skills}${detail?.description ? `，描述 ${detail.description}` : ""}${item.wikiUrl ? `，页面 ${item.wikiUrl}` : ""}`;
     }),
@@ -576,7 +609,8 @@ function localFallbackAnswerFromResults(results) {
           const distribution = detail?.distribution ? `，分布${[detail.distribution.location, detail.distribution.category].filter(Boolean).join(" / ")}` : "";
           const characteristic = detail?.characteristics?.[0]?.name ? `，特性${detail.characteristics[0].name}：${detail.characteristics[0].description || ""}` : "";
           const restraints = detail?.restraints ? `，克制${detail.restraints.strongAgainst?.join("、") || "未知"}，被克制${detail.restraints.weakAgainst?.join("、") || "未知"}` : "";
-          const skills = detail?.skills?.length ? `，技能：${detail.skills.slice(0, 10).map((skill) => `${skill.name}(${skill.attribute}/${skill.category}/威力${skill.power})`).join("、")}` : "";
+          const detailSkills = detail ? allDetailSkills(detail) : [];
+          const skills = detailSkills.length ? `，技能：${detailSkills.slice(0, 12).map((skill) => `${skill.name}(${skill.source}/${skill.attribute}/${skill.category}/威力${skill.power})`).join("、")}` : "";
           return `NO.${item.number} ${item.name}（${item.types.join("、") || "未知属性"}，${item.stage || "未知阶段"}，${item.form || "未知形态"}${stats}${distribution}${characteristic}${restraints}${skills}）`;
         })
         .join("；")}`

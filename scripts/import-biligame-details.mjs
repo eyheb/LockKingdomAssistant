@@ -6,8 +6,9 @@ const __filename = fileURLToPath(import.meta.url);
 const projectRoot = path.resolve(path.dirname(__filename), "..");
 const rawRoot = path.join(projectRoot, "materials", "raw", "biligame-spirit-details");
 const dataRoot = path.join(projectRoot, "data");
+const generatedRoot = path.join(projectRoot, "generated-data");
 const dexPath = path.join(dataRoot, "biligame-spirit-dex.json");
-const outputJson = path.join(dataRoot, "biligame-spirit-details.json");
+const outputJson = path.resolve(process.env.BILIGAME_DETAIL_OUTPUT || path.join(generatedRoot, "biligame-spirit-details.json"));
 const sourceRoot = "https://wiki.biligame.com/rocom/";
 const delayMs = Number(process.env.BILIGAME_DETAIL_DELAY_MS || 180);
 const retryCount = Number(process.env.BILIGAME_DETAIL_RETRIES || 4);
@@ -262,6 +263,77 @@ function blocksByClass(html, className) {
     .map((chunk) => `<div class="${className}"${chunk.split(new RegExp(`<div class="${className}"`))[0]}`);
 }
 
+function parseSkillBox(block, source) {
+  const link = block.match(/<a href="([^"]+)" title="([^"]+)">/);
+  const type = decodeHtml(block.match(/alt="图标 宠物 属性 ([^"]+?)\.png"/)?.[1] || "");
+  return {
+    source,
+    level: stripTags(firstMatch(block, /rocom_sprite_skill_level[^>]*>([\s\S]*?)<\/div>/)),
+    name: stripTags(firstMatch(block, /rocom_sprite_skillName[^>]*>([\s\S]*?)<\/div>/)) || decodeHtml(link?.[2] || ""),
+    attribute: type,
+    category: stripTags(firstMatch(block, /rocom_sprite_skillType[^>]*>([\s\S]*?)<\/div>/)),
+    damage: stripTags(firstMatch(block, /rocom_sprite_skillDamage[^>]*>([\s\S]*?)<\/div>/)),
+    power: stripTags(firstMatch(block, /rocom_sprite_skill_power[^>]*>([\s\S]*?)<\/div>/)),
+    description: stripTags(firstMatch(block, /rocom_sprite_skillContent[^>]*>([\s\S]*?)<\/div>/)),
+    wikiUrl: absoluteWikiUrl(link?.[1] || "")
+  };
+}
+
+function dedupeSkills(skills) {
+  const seen = new Set();
+  return skills.filter((skill) => {
+    if (!skill.name) return false;
+    const key = [skill.source, skill.level, skill.name, skill.description].join("|");
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function parseSkillsFromBlock(block, source) {
+  return dedupeSkills(blocksByClass(block, "rocom_sprite_skill_box").map((skillBlock) => parseSkillBox(skillBlock, source)));
+}
+
+function parseSkillTabs(html) {
+  const tabs = {
+    skills: [],
+    bloodlineSkills: [],
+    skillStones: []
+  };
+
+  const firstTabBox = html.indexOf("rocom_sprite_skill_tabBox");
+  const nextTabBox = firstTabBox === -1 ? -1 : html.indexOf("rocom_sprite_skill_tabBox", firstTabBox + 1);
+  const skillHtml = firstTabBox === -1 ? html : html.slice(firstTabBox, nextTabBox === -1 ? html.length : nextTabBox);
+  const seenTitles = new Set();
+  const tabStarts = [...skillHtml.matchAll(/<div class="tabbertab" title="([^"]+)">/g)].map((match) => ({
+    title: decodeHtml(match[1]),
+    start: match.index,
+    contentStart: match.index + match[0].length
+  }));
+
+  for (const [index, tab] of tabStarts.entries()) {
+    const title = tab.title;
+    if (seenTitles.has(title)) continue;
+    seenTitles.add(title);
+    const end = tabStarts[index + 1]?.start || skillHtml.length;
+    const block = skillHtml.slice(tab.contentStart, end);
+
+    if (title === "精灵技能") {
+      tabs.skills = parseSkillsFromBlock(block, "精灵技能");
+    } else if (title === "血脉技能") {
+      tabs.bloodlineSkills = parseSkillsFromBlock(block, "血脉技能");
+    } else if (title === "可学技能石") {
+      tabs.skillStones = parseSkillsFromBlock(block, "可学技能石");
+    }
+  }
+
+  if (!tabs.skills.length && !tabs.bloodlineSkills.length && !tabs.skillStones.length) {
+    tabs.skills = parseSkillsFromBlock(skillHtml, "精灵技能");
+  }
+
+  return tabs;
+}
+
 function parseSkills(html) {
   const skills = blocksByClass(html, "rocom_sprite_skill_box").map((block) => {
     const link = block.match(/<a href="([^"]+)" title="([^"]+)">/);
@@ -289,6 +361,7 @@ function parseSkills(html) {
 }
 
 function parseDetail(spirit, html) {
+  const skillTabs = parseSkillTabs(html);
   return {
     number: spirit.number,
     name: spirit.name,
@@ -302,7 +375,9 @@ function parseDetail(spirit, html) {
     characteristics: parseCharacteristics(html),
     evolution: parseEvolution(html),
     restraints: parseRestraints(html),
-    skills: parseSkills(html)
+    skills: skillTabs.skills,
+    bloodlineSkills: skillTabs.bloodlineSkills,
+    skillStones: skillTabs.skillStones
   };
 }
 
@@ -314,6 +389,30 @@ function existingDetailsByUrl() {
   } catch {
     return new Map();
   }
+}
+
+function hasSplitSkillTabs(detail) {
+  return Array.isArray(detail?.skills) && Array.isArray(detail?.bloodlineSkills) && Array.isArray(detail?.skillStones);
+}
+
+function buildPayload(details, errors) {
+  return {
+    generatedAt: new Date().toISOString(),
+    source: {
+      name: "BWIKI 洛克王国世界 精灵详情页",
+      url: sourceRoot,
+      license: "CC BY-NC-SA 4.0",
+      licenseUrl: "https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans"
+    },
+    total: details.length,
+    errors,
+    details
+  };
+}
+
+function writePayload(details, errors) {
+  fs.mkdirSync(path.dirname(outputJson), { recursive: true });
+  fs.writeFileSync(outputJson, JSON.stringify(buildPayload(details, errors), null, 2), "utf8");
 }
 
 async function main() {
@@ -333,13 +432,14 @@ async function main() {
     try {
       const htmlPath = path.join(rawRoot, safeFilename(spirit));
       const existingDetail = existing.get(spirit.wikiUrl);
-      if (existingDetail && fs.existsSync(htmlPath)) {
+      if (existingDetail && hasSplitSkillTabs(existingDetail)) {
         details.push(existingDetail);
       } else {
         const html = await fetchHtml(spirit);
         details.push(parseDetail(spirit, html));
       }
       if ((index + 1) % 25 === 0 || index === spirits.length - 1) {
+        writePayload(details, errors);
         console.log(`Imported ${index + 1}/${spirits.length} details`);
       }
     } catch (error) {
@@ -353,21 +453,7 @@ async function main() {
     }
   }
 
-  const payload = {
-    generatedAt: new Date().toISOString(),
-    source: {
-      name: "BWIKI 洛克王国世界 精灵详情页",
-      url: sourceRoot,
-      license: "CC BY-NC-SA 4.0",
-      licenseUrl: "https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans"
-    },
-    total: details.length,
-    errors,
-    details
-  };
-
-  fs.mkdirSync(dataRoot, { recursive: true });
-  fs.writeFileSync(outputJson, JSON.stringify(payload, null, 2), "utf8");
+  writePayload(details, errors);
   console.log(`Imported ${details.length} Biligame spirit detail pages`);
   if (errors.length) console.log(`Errors: ${errors.length}`);
 }
