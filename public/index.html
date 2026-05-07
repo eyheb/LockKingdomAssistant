@@ -18,11 +18,6 @@
           </div>
         </div>
 
-        <button class="new-chat" id="newChat" type="button">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
-          新对话
-        </button>
-
         <nav class="nav-list" aria-label="主导航">
           <button class="nav-item active" data-view="assistant" type="button">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"></path></svg>
@@ -70,7 +65,13 @@
                 <h2>洛克王国虚拟助手</h2>
                 <p id="assistantMeta">资料加载中</p>
               </div>
-              <span class="muted-chip" id="status">就绪</span>
+              <div class="pane-actions">
+                <span class="muted-chip" id="status">就绪</span>
+                <button class="new-chat assistant-new-chat" id="newChat" type="button">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+                  新对话
+                </button>
+              </div>
             </div>
 
             <div id="messages" class="messages"></div>
@@ -259,6 +260,10 @@
               <section class="result-section">
                 <h3>蛋组</h3>
                 <div id="groups" class="result-list"></div>
+              </section>
+              <section class="result-section">
+                <h3>技能</h3>
+                <div id="skills" class="result-list"></div>
               </section>
               <section class="result-section">
                 <h3>交换记录</h3>

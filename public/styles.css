@@ -75,7 +75,7 @@ svg {
 
 .sidebar {
   display: flex;
-  width: 220px;
+  width: 232px;
   flex-shrink: 0;
   flex-direction: column;
   background: var(--secondary);
@@ -89,9 +89,14 @@ svg {
   padding: 0 16px;
 }
 
+.sidebar-brand > div:last-child {
+  min-width: 0;
+}
+
 .sidebar-brand strong {
   display: block;
-  font-size: 16px;
+  white-space: nowrap;
+  font-size: 14px;
   line-height: 1;
 }
 
@@ -115,7 +120,6 @@ svg {
   font-weight: 700;
 }
 
-.new-chat,
 .nav-item {
   display: flex;
   width: calc(100% - 16px);
@@ -132,8 +136,17 @@ svg {
 }
 
 .new-chat {
-  margin-bottom: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  font-size: 13px;
   padding: 9px 12px;
+  transition: background 0.16s ease, color 0.16s ease;
 }
 
 .nav-list {
@@ -289,6 +302,24 @@ svg {
   margin: 5px 0 0;
   color: var(--muted-foreground);
   font-size: 13px;
+}
+
+.pane-actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+}
+
+.assistant-new-chat {
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+.assistant-new-chat:hover {
+  background: var(--accent);
 }
 
 .muted-chip {
@@ -1401,10 +1432,6 @@ svg {
     flex-direction: row;
     overflow-x: auto;
     padding: 8px;
-  }
-
-  .new-chat {
-    display: none;
   }
 
   .nav-item {

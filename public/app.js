@@ -1,4 +1,4 @@
-const starters = ["魔力猫在哪个蛋组？", "龙组有哪些精灵？", "老马有什么可以交换？", "伊兰亚龙能和哪些蛋组相关？"];
+const starters = ["地系什么技能威力最高？", "迪莫的种族值和技能有哪些？", "龙组有哪些可以交换的精灵？", "固执性格的交换记录有哪些？"];
 const stageOrder = ["Ⅰ阶", "Ⅱ阶", "最终形态"];
 const typeOrder = ["普通", "草", "火", "水", "光", "地", "冰", "龙", "电", "毒", "幽", "武", "翼", "萌", "幻", "恶", "机械", "虫"];
 const specialOptions = [
@@ -20,7 +20,7 @@ const viewTitles = {
 const state = {
   activeView: "assistant",
   data: { spirits: [], groups: [], exchange: [], biligameDex: [], biligameDetails: [] },
-  latestResults: { spirits: [], dex: [], groups: [], exchange: [], totals: { spirits: 0, dex: 0, details: 0, groups: 0, exchange: 0 } },
+  latestResults: { spirits: [], dex: [], groups: [], exchange: [], skills: [], insights: {}, totals: { spirits: 0, dex: 0, details: 0, groups: 0, exchange: 0, skills: 0 } },
   messages: [
     {
       role: "assistant",
@@ -60,6 +60,7 @@ const elements = {
   resultMeta: $("#resultMeta"),
   spirits: $("#spirits"),
   groups: $("#groups"),
+  skills: $("#skills"),
   exchange: $("#exchange"),
   viewTitle: $("#viewTitle"),
   spiritSearch: $("#spiritSearch"),
@@ -126,6 +127,10 @@ function statText(stats = {}) {
   ].filter(Boolean).join(" / ");
 }
 
+function countSkillEntries(details = []) {
+  return details.reduce((sum, detail) => sum + (detail.skills?.length || 0), 0);
+}
+
 function normalize(value) {
   return String(value || "").trim().toLowerCase();
 }
@@ -181,11 +186,12 @@ function renderMessages() {
 }
 
 function renderInspector(data) {
-  elements.resultMeta.textContent = `资料总量：${data.totals.spirits} 蛋组精灵 / ${data.totals.dex || 0} 图鉴 / ${data.totals.details || 0} 详情 / ${data.totals.groups} 蛋组 / ${data.totals.exchange} 交换记录`;
+  elements.resultMeta.textContent = `资料总量：${data.totals.spirits} 蛋组精灵 / ${data.totals.dex || 0} 图鉴 / ${data.totals.details || 0} 详情 / ${data.totals.skills || 0} 技能条目 / ${data.totals.groups} 蛋组 / ${data.totals.exchange} 交换记录`;
 
   if (!data.query) {
     elements.spirits.innerHTML = `<p class="empty">输入关键词后显示精灵匹配</p>`;
     elements.groups.innerHTML = `<p class="empty">输入关键词后显示蛋组匹配</p>`;
+    elements.skills.innerHTML = `<p class="empty">输入关键词后显示技能匹配</p>`;
     elements.exchange.innerHTML = `<p class="empty">输入关键词后显示交换记录</p>`;
     return;
   }
@@ -201,6 +207,18 @@ function renderInspector(data) {
     ? data.groups.map((item) => resultCard(item.name, item.spirits.slice(0, 12).join("、"))).join("")
     : `<p class="empty">没有匹配蛋组</p>`;
 
+  elements.skills.innerHTML = data.skills?.length
+    ? data.skills
+        .map((item) =>
+          resultCard(
+            item.name,
+            [item.attribute, item.category, item.power ? `威力 ${item.power}` : "", item.ownerName ? `来源 ${item.ownerName}` : ""].filter(Boolean).join(" · "),
+            [item.attribute, item.category].filter(Boolean)
+          )
+        )
+        .join("")
+    : `<p class="empty">没有匹配技能</p>`;
+
   elements.exchange.innerHTML = data.exchange.length
     ? data.exchange
         .map((item) =>
@@ -215,10 +233,11 @@ function renderInspector(data) {
 
 function renderDataViews() {
   const { spirits, groups, exchange, biligameDex = [], biligameDetails = [] } = state.data;
+  const skillCount = countSkillEntries(biligameDetails);
   elements.spiritCount.textContent = `${spirits.length} 蛋组精灵 / ${biligameDex.length} 图鉴`;
   elements.groupCount.textContent = `${groups.length} 蛋组`;
   elements.exchangeCount.textContent = `${exchange.length} 记录`;
-  const summary = `${spirits.length} 蛋组精灵 / ${biligameDex.length} 图鉴 / ${biligameDetails.length} 详情 / ${groups.length} 蛋组 / ${exchange.length} 交换记录`;
+  const summary = `${spirits.length} 蛋组精灵 / ${biligameDex.length} 图鉴 / ${biligameDetails.length} 详情 / ${skillCount} 技能条目 / ${groups.length} 蛋组 / ${exchange.length} 交换记录`;
   elements.assistantMeta.textContent = summary;
   elements.spiritMeta.textContent = summary;
   elements.groupMeta.textContent = summary;

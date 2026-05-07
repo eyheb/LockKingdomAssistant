@@ -65,7 +65,7 @@ export async function callModel(message, history = []) {
 
   const baseUrl = process.env.LLM_BASE_URL?.trim() || "https://api.openai.com/v1";
   const model = process.env.LLM_MODEL?.trim() || "gpt-4o-mini";
-  const results = await searchKnowledgeAsync(message, 10);
+  const results = await searchKnowledgeAsync(message, 18);
   const context = formatResultsForPrompt(results);
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), getModelTimeoutMs());
@@ -86,7 +86,7 @@ export async function callModel(message, history = []) {
           {
             role: "system",
             content:
-              "你是一个洛克王国世界朋友群使用的虚拟助手。优先根据提供的本地资料回答；资料不足时明确说明不确定，并建议用户补充数据。回答用简洁中文。"
+              "你是一个洛克王国世界朋友群使用的虚拟助手。必须优先根据提供的本地资料回答，资料包括精灵图鉴、种族值、特性、技能、蛋组和朋友交换记录。遇到最高威力、排序、筛选、对比类问题时，优先使用本地资料里的可计算结论；资料不足时明确说明不确定。回答用简洁中文。"
           },
           ...history.slice(-4).map((item) => ({
             role: item.role === "assistant" ? "assistant" : "user",
