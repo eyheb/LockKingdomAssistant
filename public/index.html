@@ -93,18 +93,59 @@
               </div>
               <span class="muted-chip" id="spiritCount">0 精灵</span>
             </div>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>精灵</th>
-                    <th>蛋组</th>
-                    <th>交换</th>
-                  </tr>
-                </thead>
-                <tbody id="spiritTable"></tbody>
-              </table>
+            <div class="dex-workbench">
+              <div class="dex-toolbar">
+                <label class="dex-search">
+                  <span>名称 / 编号 / 形态</span>
+                  <input id="spiritSearch" type="search" autocomplete="off" />
+                </label>
+                <label class="dex-select">
+                  <span>蛋组</span>
+                  <select id="dexEggGroup"></select>
+                </label>
+                <label class="dex-select">
+                  <span>排序</span>
+                  <select id="dexSort">
+                    <option value="number">图鉴编号</option>
+                    <option value="name">名称</option>
+                    <option value="stage">阶段</option>
+                    <option value="type">属性</option>
+                    <option value="form">形态</option>
+                  </select>
+                </label>
+                <button class="dex-reset" id="dexReset" type="button">查看全部</button>
+              </div>
+
+              <div class="dex-filter-panel">
+                <section class="dex-filter-group">
+                  <h3>精灵类型</h3>
+                  <div class="filter-buttons" id="dexStageFilters"></div>
+                </section>
+                <section class="dex-filter-group">
+                  <h3>特殊形态</h3>
+                  <div class="filter-buttons" id="dexSpecialFilters"></div>
+                </section>
+                <section class="dex-filter-group">
+                  <h3>精灵异色</h3>
+                  <div class="filter-buttons" id="dexShinyFilters"></div>
+                </section>
+                <section class="dex-filter-group wide">
+                  <h3>精灵属性</h3>
+                  <div class="filter-buttons type-filters" id="dexTypeFilters"></div>
+                </section>
+              </div>
+
+              <div class="dex-result-bar">
+                <strong id="dexResultCount">0 / 0 条</strong>
+                <div class="active-filters" id="dexActiveFilters"></div>
+              </div>
+
+              <div class="dex-grid" id="dexGrid"></div>
             </div>
+          </section>
+
+          <section class="primary-pane surface-card hidden" id="detailView">
+            <div class="detail-content" id="detailContent"></div>
           </section>
 
           <section class="primary-pane surface-card hidden" id="groupsView">

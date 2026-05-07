@@ -17,14 +17,17 @@ export function loadData() {
   const eggGroupFile = readJson("egg-groups.json", { groups: [] });
   const exchangeFile = readJson("exchange.json", { entries: [] });
   const biligameDexFile = readJson("biligame-spirit-dex.json", { spirits: [], source: null });
+  const biligameDetailsFile = readJson("biligame-spirit-details.json", { details: [], source: null });
 
   return {
     spirits: spiritFile.spirits,
     groups: eggGroupFile.groups,
     exchange: exchangeFile.entries,
     biligameDex: biligameDexFile.spirits,
+    biligameDetails: biligameDetailsFile.details,
     sources: {
-      biligameDex: biligameDexFile.source
+      biligameDex: biligameDexFile.source,
+      biligameDetails: biligameDetailsFile.source
     }
   };
 }
@@ -58,9 +61,10 @@ function sortByName(a, b) {
 }
 
 export function searchKnowledge(query, limit = 12) {
-  const { spirits, groups, exchange, biligameDex } = loadData();
+  const { spirits, groups, exchange, biligameDex, biligameDetails } = loadData();
   const cleanQuery = String(query || "").trim();
   const safeLimit = Number.isFinite(Number(limit)) ? Math.max(1, Math.min(Number(limit), 50)) : 12;
+  const detailsByUrl = new Map(biligameDetails.map((detail) => [detail.wikiUrl, detail]));
 
   if (!cleanQuery) {
     return {
@@ -72,6 +76,7 @@ export function searchKnowledge(query, limit = 12) {
       totals: {
         spirits: spirits.length,
         dex: biligameDex.length,
+        details: biligameDetails.length,
         groups: groups.length,
         exchange: exchange.length
       }
@@ -113,7 +118,11 @@ export function searchKnowledge(query, limit = 12) {
       );
   const dexMatches = dexSource
     .sort((a, b) => Number(a.number) - Number(b.number) || a.name.localeCompare(b.name, "zh-Hans-CN"))
-    .slice(0, safeLimit);
+    .slice(0, safeLimit)
+    .map((spirit) => ({
+      ...spirit,
+      detail: detailsByUrl.get(spirit.wikiUrl) || null
+    }));
 
   const exchangeMatches = exchange
     .filter((entry) =>
@@ -142,6 +151,7 @@ export function searchKnowledge(query, limit = 12) {
     totals: {
       spirits: spirits.length,
       dex: biligameDex.length,
+      details: biligameDetails.length,
       groups: groups.length,
       exchange: exchange.length
     }
@@ -156,7 +166,13 @@ export function formatResultsForPrompt(results) {
     ...results.spirits.map((item) => `- ${item.name}：${item.eggGroups.join("、") || "未知蛋组"}`),
     "",
     "图鉴匹配：",
-    ...results.dex.map((item) => `- NO.${item.number} ${item.name}：${item.types.join("、") || "未知属性"}，${item.stage || "未知阶段"}，${item.form || "未知形态"}${item.wikiUrl ? `，页面 ${item.wikiUrl}` : ""}`),
+    ...results.dex.map((item) => {
+      const detail = item.detail;
+      const stats = detail?.stats?.total ? `，种族值 ${detail.stats.total}` : "";
+      const characteristic = detail?.characteristics?.[0]?.name ? `，特性 ${detail.characteristics[0].name}` : "";
+      const skills = detail?.skills?.length ? `，技能 ${detail.skills.slice(0, 8).map((skill) => skill.name).join("、")}` : "";
+      return `- NO.${item.number} ${item.name}：${item.types.join("、") || "未知属性"}，${item.stage || "未知阶段"}，${item.form || "未知形态"}${stats}${characteristic}${skills}${item.wikiUrl ? `，页面 ${item.wikiUrl}` : ""}`;
+    }),
     "",
     "蛋组匹配：",
     ...results.groups.map((item) => `- ${item.name}：${item.spirits.slice(0, 20).join("、")}`),
@@ -189,7 +205,13 @@ export function localFallbackAnswer(question) {
   if (results.dex.length) {
     parts.push(
       `图鉴资料：${results.dex
-        .map((item) => `NO.${item.number} ${item.name}（${item.types.join("、") || "未知属性"}，${item.stage || "未知阶段"}，${item.form || "未知形态"}）`)
+        .map((item) => {
+          const detail = item.detail;
+          const stats = detail?.stats?.total ? `，种族值${detail.stats.total}` : "";
+          const characteristic = detail?.characteristics?.[0]?.name ? `，特性${detail.characteristics[0].name}` : "";
+          const skills = detail?.skills?.length ? `，技能：${detail.skills.slice(0, 6).map((skill) => skill.name).join("、")}` : "";
+          return `NO.${item.number} ${item.name}（${item.types.join("、") || "未知属性"}，${item.stage || "未知阶段"}，${item.form || "未知形态"}${stats}${characteristic}${skills}）`;
+        })
         .join("；")}`
     );
   }

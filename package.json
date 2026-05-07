@@ -8,6 +8,7 @@
   },
   "scripts": {
     "build:data": "node scripts/build-data.mjs && node scripts/import-biligame-dex.mjs",
+    "import:details": "node scripts/import-biligame-details.mjs",
     "dev": "node scripts/server.mjs",
     "build": "npm run build:data",
     "start": "node scripts/server.mjs",
