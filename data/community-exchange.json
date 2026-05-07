@@ -1,36 +1,484 @@
 {
   "version": 2,
-  "updatedAt": "2026-05-07T20:08:23.966Z",
+  "updatedAt": "2026-05-08T04:10:00.000Z",
   "users": [],
   "entries": [
     {
-      "id": "legacy-laoma-yilanyalong",
-      "player": "老马",
-      "spirit": "伊兰亚龙",
-      "gender": "公",
-      "nature": "固执",
+      "id": "wps-summary-1-文-罗隐",
+      "player": "文",
+      "spirit": "罗隐",
+      "gender": "母",
+      "nature": "固执（+物攻 -魔攻）",
       "level": "",
       "eggGroups": [
-        "龙组"
+        "大地组",
+        "巨灵组"
       ],
       "stats": {
-        "hp": "",
+        "hp": "1",
+        "attack": "1",
+        "magicAttack": "",
+        "defense": "1",
+        "magicDefense": "",
+        "speed": ""
+      },
+      "note": "大块头",
+      "createdAt": "2026-05-08T04:10:00.000Z",
+      "updatedAt": "2026-05-08T04:10:00.000Z"
+    },
+    {
+      "id": "wps-summary-2-文-蹦床松鼠",
+      "player": "文",
+      "spirit": "蹦床松鼠",
+      "gender": "母",
+      "nature": "踏实（+生命 -速度）",
+      "level": "",
+      "eggGroups": [
+        "动物组"
+      ],
+      "stats": {
+        "hp": "1",
         "attack": "",
         "magicAttack": "",
+        "defense": "1",
+        "magicDefense": "1",
+        "speed": ""
+      },
+      "note": "",
+      "createdAt": "2026-05-08T04:10:00.000Z",
+      "updatedAt": "2026-05-08T04:10:00.000Z"
+    },
+    {
+      "id": "wps-summary-3-文-尖嘴狐仙",
+      "player": "文",
+      "spirit": "尖嘴狐仙",
+      "gender": "公",
+      "nature": "踏实（+生命 -速度）",
+      "level": "",
+      "eggGroups": [
+        "动物组"
+      ],
+      "stats": {
+        "hp": "1",
+        "attack": "",
+        "magicAttack": "",
+        "defense": "1",
+        "magicDefense": "1",
+        "speed": ""
+      },
+      "note": "",
+      "createdAt": "2026-05-08T04:10:00.000Z",
+      "updatedAt": "2026-05-08T04:10:00.000Z"
+    },
+    {
+      "id": "wps-summary-4-文-寂灭骨龙",
+      "player": "文",
+      "spirit": "寂灭骨龙",
+      "gender": "公",
+      "nature": "固执（+物攻 -魔攻）",
+      "level": "",
+      "eggGroups": [
+        "龙组",
+        "巨灵组"
+      ],
+      "stats": {
+        "hp": "1",
+        "attack": "1",
+        "magicAttack": "",
+        "defense": "1",
+        "magicDefense": "",
+        "speed": ""
+      },
+      "note": "大块头",
+      "createdAt": "2026-05-08T04:10:00.000Z",
+      "updatedAt": "2026-05-08T04:10:00.000Z"
+    },
+    {
+      "id": "wps-summary-5-文-瞌睡王",
+      "player": "文",
+      "spirit": "瞌睡王",
+      "gender": "母",
+      "nature": "平和（+生命 -魔攻）",
+      "level": "",
+      "eggGroups": [
+        "拟人组",
+        "巨灵组"
+      ],
+      "stats": {
+        "hp": "1",
+        "attack": "1",
+        "magicAttack": "",
+        "defense": "1",
+        "magicDefense": "",
+        "speed": ""
+      },
+      "note": "大块头",
+      "createdAt": "2026-05-08T04:10:00.000Z",
+      "updatedAt": "2026-05-08T04:10:00.000Z"
+    },
+    {
+      "id": "wps-summary-6-文-影狸",
+      "player": "文",
+      "spirit": "影狸",
+      "gender": "母",
+      "nature": "胆小（+速度 -物攻）",
+      "level": "",
+      "eggGroups": [
+        "拟人组",
+        "动物组"
+      ],
+      "stats": {
+        "hp": "1",
+        "attack": "",
+        "magicAttack": "1",
         "defense": "",
+        "magicDefense": "",
+        "speed": "1"
+      },
+      "note": "",
+      "createdAt": "2026-05-08T04:10:00.000Z",
+      "updatedAt": "2026-05-08T04:10:00.000Z"
+    },
+    {
+      "id": "wps-summary-7-文-寒音蛇",
+      "player": "文",
+      "spirit": "寒音蛇",
+      "gender": "公",
+      "nature": "开朗（+速度 -魔攻）",
+      "level": "",
+      "eggGroups": [
+        "动物组",
+        "两栖组"
+      ],
+      "stats": {
+        "hp": "1",
+        "attack": "1",
+        "magicAttack": "",
+        "defense": "",
+        "magicDefense": "",
+        "speed": "1"
+      },
+      "note": "",
+      "createdAt": "2026-05-08T04:10:00.000Z",
+      "updatedAt": "2026-05-08T04:10:00.000Z"
+    },
+    {
+      "id": "wps-summary-8-文-寒音蛇",
+      "player": "文",
+      "spirit": "寒音蛇",
+      "gender": "母",
+      "nature": "开朗（+速度 -魔攻）",
+      "level": "",
+      "eggGroups": [
+        "动物组",
+        "两栖组"
+      ],
+      "stats": {
+        "hp": "1",
+        "attack": "1",
+        "magicAttack": "",
+        "defense": "",
+        "magicDefense": "",
+        "speed": "1"
+      },
+      "note": "",
+      "createdAt": "2026-05-08T04:10:00.000Z",
+      "updatedAt": "2026-05-08T04:10:00.000Z"
+    },
+    {
+      "id": "wps-summary-9-文-闪电鳗鱼",
+      "player": "文",
+      "spirit": "闪电鳗鱼",
+      "gender": "公",
+      "nature": "胆小（+速度 -物攻）",
+      "level": "",
+      "eggGroups": [
+        "海洋组"
+      ],
+      "stats": {
+        "hp": "1",
+        "attack": "",
+        "magicAttack": "1",
+        "defense": "",
+        "magicDefense": "",
+        "speed": "1"
+      },
+      "note": "",
+      "createdAt": "2026-05-08T04:10:00.000Z",
+      "updatedAt": "2026-05-08T04:10:00.000Z"
+    },
+    {
+      "id": "wps-summary-10-文-闪电鳗鱼",
+      "player": "文",
+      "spirit": "闪电鳗鱼",
+      "gender": "母",
+      "nature": "胆小（+速度 -物攻）",
+      "level": "",
+      "eggGroups": [
+        "海洋组"
+      ],
+      "stats": {
+        "hp": "1",
+        "attack": "",
+        "magicAttack": "1",
+        "defense": "",
+        "magicDefense": "",
+        "speed": "1"
+      },
+      "note": "",
+      "createdAt": "2026-05-08T04:10:00.000Z",
+      "updatedAt": "2026-05-08T04:10:00.000Z"
+    },
+    {
+      "id": "wps-summary-11-文-恶魔狼",
+      "player": "文",
+      "spirit": "恶魔狼",
+      "gender": "公",
+      "nature": "固执（+物攻 -魔攻）",
+      "level": "",
+      "eggGroups": [
+        "动物组"
+      ],
+      "stats": {
+        "hp": "1",
+        "attack": "1",
+        "magicAttack": "",
+        "defense": "",
+        "magicDefense": "",
+        "speed": "1"
+      },
+      "note": "",
+      "createdAt": "2026-05-08T04:10:00.000Z",
+      "updatedAt": "2026-05-08T04:10:00.000Z"
+    },
+    {
+      "id": "wps-summary-12-文-恶魔狼",
+      "player": "文",
+      "spirit": "恶魔狼",
+      "gender": "公",
+      "nature": "平和（+生命 -魔攻）",
+      "level": "",
+      "eggGroups": [
+        "动物组"
+      ],
+      "stats": {
+        "hp": "1",
+        "attack": "",
+        "magicAttack": "",
+        "defense": "1",
+        "magicDefense": "1",
+        "speed": ""
+      },
+      "note": "",
+      "createdAt": "2026-05-08T04:10:00.000Z",
+      "updatedAt": "2026-05-08T04:10:00.000Z"
+    },
+    {
+      "id": "wps-summary-13-文-月亮砣（下弦的样子）",
+      "player": "文",
+      "spirit": "月亮砣（下弦的样子）",
+      "gender": "公",
+      "nature": "胆小（+速度 -物攻）",
+      "level": "",
+      "eggGroups": [
+        "海洋组"
+      ],
+      "stats": {
+        "hp": "1",
+        "attack": "",
+        "magicAttack": "1",
+        "defense": "",
+        "magicDefense": "",
+        "speed": "1"
+      },
+      "note": "",
+      "createdAt": "2026-05-08T04:10:00.000Z",
+      "updatedAt": "2026-05-08T04:10:00.000Z"
+    },
+    {
+      "id": "wps-summary-14-文-恶魔狼",
+      "player": "文",
+      "spirit": "恶魔狼",
+      "gender": "公",
+      "nature": "开朗（+速度 -魔攻）",
+      "level": "",
+      "eggGroups": [
+        "动物组"
+      ],
+      "stats": {
+        "hp": "1",
+        "attack": "1",
+        "magicAttack": "",
+        "defense": "",
+        "magicDefense": "",
+        "speed": "1"
+      },
+      "note": "",
+      "createdAt": "2026-05-08T04:10:00.000Z",
+      "updatedAt": "2026-05-08T04:10:00.000Z"
+    },
+    {
+      "id": "wps-summary-15-文-兽花蕾",
+      "player": "文",
+      "spirit": "兽花蕾",
+      "gender": "母",
+      "nature": "踏实（+生命 -速度）",
+      "level": "",
+      "eggGroups": [
+        "植物组"
+      ],
+      "stats": {
+        "hp": "1",
+        "attack": "",
+        "magicAttack": "",
+        "defense": "1",
+        "magicDefense": "1",
+        "speed": ""
+      },
+      "note": "",
+      "createdAt": "2026-05-08T04:10:00.000Z",
+      "updatedAt": "2026-05-08T04:10:00.000Z"
+    },
+    {
+      "id": "wps-summary-16-文-兽花蕾",
+      "player": "文",
+      "spirit": "兽花蕾",
+      "gender": "公",
+      "nature": "踏实（+生命 -速度）",
+      "level": "",
+      "eggGroups": [
+        "植物组"
+      ],
+      "stats": {
+        "hp": "1",
+        "attack": "",
+        "magicAttack": "1",
+        "defense": "",
+        "magicDefense": "1",
+        "speed": ""
+      },
+      "note": "",
+      "createdAt": "2026-05-08T04:10:00.000Z",
+      "updatedAt": "2026-05-08T04:10:00.000Z"
+    },
+    {
+      "id": "wps-summary-17-文-翠顶夫人",
+      "player": "文",
+      "spirit": "翠顶夫人",
+      "gender": "母",
+      "nature": "固执（+物攻 -魔攻）",
+      "level": "",
+      "eggGroups": [
+        "天空组",
+        "两栖组"
+      ],
+      "stats": {
+        "hp": "1",
+        "attack": "1",
+        "magicAttack": "",
+        "defense": "",
+        "magicDefense": "",
+        "speed": "1"
+      },
+      "note": "",
+      "createdAt": "2026-05-08T04:10:00.000Z",
+      "updatedAt": "2026-05-08T04:10:00.000Z"
+    },
+    {
+      "id": "wps-summary-18-文-海枝枝（碧蓝珊瑚）",
+      "player": "文",
+      "spirit": "海枝枝（碧蓝珊瑚）",
+      "gender": "公",
+      "nature": "胆小（+速度 -物攻）",
+      "level": "",
+      "eggGroups": [
+        "海洋组",
+        "植物组"
+      ],
+      "stats": {
+        "hp": "1",
+        "attack": "",
+        "magicAttack": "1",
+        "defense": "",
+        "magicDefense": "",
+        "speed": "1"
+      },
+      "note": "",
+      "createdAt": "2026-05-08T04:10:00.000Z",
+      "updatedAt": "2026-05-08T04:10:00.000Z"
+    },
+    {
+      "id": "wps-summary-19-文-巨嗤针鼹",
+      "player": "文",
+      "spirit": "巨嗤针鼹",
+      "gender": "母",
+      "nature": "固执（+物攻 -魔攻）",
+      "level": "",
+      "eggGroups": [
+        "动物组"
+      ],
+      "stats": {
+        "hp": "1",
+        "attack": "1",
+        "magicAttack": "",
+        "defense": "1",
         "magicDefense": "",
         "speed": ""
       },
       "note": "",
-      "createdAt": "2026-05-08T00:00:00.000Z",
-      "updatedAt": "2026-05-08T00:00:00.000Z"
+      "createdAt": "2026-05-08T04:10:00.000Z",
+      "updatedAt": "2026-05-08T04:10:00.000Z"
     },
     {
-      "id": "legacy-laoma-molimao",
-      "player": "老马",
+      "id": "wps-summary-20-文-利灯鱼",
+      "player": "文",
+      "spirit": "利灯鱼",
+      "gender": "公",
+      "nature": "胆小（+速度 -物攻）",
+      "level": "",
+      "eggGroups": [
+        "海洋组"
+      ],
+      "stats": {
+        "hp": "1",
+        "attack": "",
+        "magicAttack": "1",
+        "defense": "",
+        "magicDefense": "",
+        "speed": "1"
+      },
+      "note": "小不点",
+      "createdAt": "2026-05-08T04:10:00.000Z",
+      "updatedAt": "2026-05-08T04:10:00.000Z"
+    },
+    {
+      "id": "wps-summary-21-文-贝古斯",
+      "player": "文",
+      "spirit": "贝古斯",
+      "gender": "公",
+      "nature": "沉默（+生命 -物攻）",
+      "level": "",
+      "eggGroups": [
+        "机械组"
+      ],
+      "stats": {
+        "hp": "1",
+        "attack": "",
+        "magicAttack": "1",
+        "defense": "1",
+        "magicDefense": "",
+        "speed": ""
+      },
+      "note": "小不点",
+      "createdAt": "2026-05-08T04:10:00.000Z",
+      "updatedAt": "2026-05-08T04:10:00.000Z"
+    },
+    {
+      "id": "wps-summary-22-张-魔力猫",
+      "player": "张",
       "spirit": "魔力猫",
-      "gender": "母",
-      "nature": "胆小",
+      "gender": "公",
+      "nature": "平和（+生命 -魔攻）",
       "level": "",
       "eggGroups": [
         "拟人组",
@@ -45,31 +493,8 @@
         "speed": ""
       },
       "note": "",
-      "createdAt": "2026-05-08T00:00:00.000Z",
-      "updatedAt": "2026-05-08T00:00:00.000Z"
-    },
-    {
-      "id": "entry-movwvgft-e7hxvj",
-      "player": "eyheb",
-      "spirit": "罗隐",
-      "gender": "公",
-      "nature": "固执",
-      "level": "",
-      "eggGroups": [
-        "大地组",
-        "巨灵组"
-      ],
-      "stats": {
-        "hp": "",
-        "attack": "",
-        "magicAttack": "",
-        "defense": "",
-        "magicDefense": "",
-        "speed": ""
-      },
-      "note": "",
-      "createdAt": "2026-05-07T20:01:15.314Z",
-      "updatedAt": "2026-05-07T20:08:23.966Z"
+      "createdAt": "2026-05-08T04:10:00.000Z",
+      "updatedAt": "2026-05-08T04:10:00.000Z"
     }
   ]
 }

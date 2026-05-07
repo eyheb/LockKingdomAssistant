@@ -80,6 +80,7 @@ const elements = {
   exchangeRefresh: $("#exchangeRefresh"),
   exchangeTableBody: $("#exchangeTableBody"),
   spiritNameList: $("#spiritNameList"),
+  natureList: $("#natureList"),
   spiritCount: $("#spiritCount"),
   groupCount: $("#groupCount"),
   exchangeCount: $("#exchangeCount"),
@@ -301,7 +302,8 @@ function setExchangeStatus(message) {
 }
 
 function exchangeCell(value, field, id, extra = "") {
-  return `<input class="exchange-cell ${extra}" data-entry-id="${escapeHtml(id)}" data-field="${field}" value="${escapeHtml(value || "")}" />`;
+  const list = field === "spirit" ? "spiritNameList" : field === "nature" ? "natureList" : "";
+  return `<input class="exchange-cell ${extra}" data-entry-id="${escapeHtml(id)}" data-field="${field}" ${list ? `list="${list}"` : ""} value="${escapeHtml(value || "")}" />`;
 }
 
 function exchangeGender(value, id) {
@@ -352,6 +354,20 @@ function markExchangeDirty(row, dirty = true) {
   row.classList.toggle("dirty", dirty);
 }
 
+function setButtonLoading(button, loading, label) {
+  if (!button) return;
+  if (loading) {
+    button.dataset.label = button.textContent;
+    button.textContent = label || "处理中";
+    button.disabled = true;
+    button.classList.add("is-loading");
+  } else {
+    button.textContent = button.dataset.label || label || button.textContent;
+    button.disabled = false;
+    button.classList.remove("is-loading");
+  }
+}
+
 async function saveExchangeRow(row) {
   const entry = rowFromElement(row);
   await saveCommunity({ action: "saveEntry", entry });
@@ -392,9 +408,49 @@ function addExchangeRow() {
 }
 
 function populateSpiritList() {
-  const names = [...new Set([...(state.data.biligameDex || []).map((item) => item.name), ...(state.data.spirits || []).map((item) => item.name)])]
+  const names = [...new Set([
+    ...(state.data.biligameDex || []).map((item) => item.name),
+    ...(state.data.spirits || []).map((item) => item.name),
+    ...(state.data.exchange || []).map((item) => item.spirit)
+  ])]
     .sort((a, b) => a.localeCompare(b, "zh-Hans-CN"));
   elements.spiritNameList.innerHTML = names.map((name) => `<option value="${escapeHtml(name)}"></option>`).join("");
+}
+
+function populateNatureList() {
+  const natures = [
+    "沉默（+生命 -物攻）",
+    "平和（+生命 -魔攻）",
+    "忧郁（+生命 -物防）",
+    "粗心（+生命 -魔防）",
+    "踏实（+生命 -速度）",
+    "逞强（+物攻 -生命）",
+    "固执（+物攻 -魔攻）",
+    "大胆（+物攻 -物防）",
+    "调皮（+物攻 -魔防）",
+    "勇敢（+物攻 -速度）",
+    "理性（+魔攻 -生命）",
+    "聪明（+魔攻 -物攻）",
+    "专注（+魔攻 -物防）",
+    "偏执（+魔攻 -魔防）",
+    "冷静（+魔攻 -速度）",
+    "坦率（+物防 -生命）",
+    "稳重（+物防 -物攻）",
+    "天真（+物防 -魔攻）",
+    "懒散（+物防 -魔防）",
+    "悠闲（+物防 -速度）",
+    "焦虑（+魔防 -生命）",
+    "鲁莽（+魔防 -物攻）",
+    "害羞（+魔防 -魔攻）",
+    "温顺（+魔防 -物防）",
+    "慎重（+魔防 -速度）",
+    "热情（+速度 -生命）",
+    "胆小（+速度 -物攻）",
+    "开朗（+速度 -魔攻）",
+    "急躁（+速度 -物防）",
+    "莽撞（+速度 -魔防）"
+  ];
+  elements.natureList.innerHTML = [...new Set(natures)].map((name) => `<option value="${escapeHtml(name)}"></option>`).join("");
 }
 
 function renderCommunityExchange() {
@@ -864,15 +920,23 @@ function wireEvents() {
   });
   elements.exchangeAddRow.addEventListener("click", addExchangeRow);
   elements.exchangeSaveAll.addEventListener("click", async () => {
+    setButtonLoading(elements.exchangeSaveAll, true, "保存中");
     try {
       await saveAllExchangeRows();
     } catch (error) {
       setExchangeStatus(error.message || "保存失败");
+    } finally {
+      setButtonLoading(elements.exchangeSaveAll, false);
     }
   });
   elements.exchangeRefresh.addEventListener("click", async () => {
-    await loadCommunityExchange();
-    await runSearch(elements.lookup.value);
+    setButtonLoading(elements.exchangeRefresh, true, "刷新中");
+    try {
+      await loadCommunityExchange();
+      await runSearch(elements.lookup.value);
+    } finally {
+      setButtonLoading(elements.exchangeRefresh, false);
+    }
   });
   elements.exchangeTableBody.addEventListener("input", (event) => {
     const field = event.target.closest("[data-field]");
@@ -898,19 +962,25 @@ function wireEvents() {
     const deleteButton = event.target.closest("button[data-delete-entry]");
     if (saveButton) {
       const row = saveButton.closest("tr[data-entry-id]");
+      setButtonLoading(saveButton, true, "保存中");
       try {
         await saveExchangeRow(row);
       } catch (error) {
         setExchangeStatus(error.message || "保存失败");
+      } finally {
+        setButtonLoading(saveButton, false);
       }
       return;
     }
     if (deleteButton) {
+      setButtonLoading(deleteButton, true, "删除中");
       try {
         await saveCommunity({ action: "deleteEntry", id: deleteButton.dataset.deleteEntry });
         setExchangeStatus("已删除这一行");
       } catch (error) {
         setExchangeStatus(error.message || "删除失败");
+      } finally {
+        setButtonLoading(deleteButton, false);
       }
     }
   });
@@ -937,5 +1007,6 @@ wireEvents();
 renderMessages();
 await loadData();
 populateSpiritList();
+populateNatureList();
 await loadCommunityExchange();
 await runSearch("");
